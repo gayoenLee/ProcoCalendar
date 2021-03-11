@@ -27,6 +27,9 @@ public struct MonthlyCalendarView: View, MonthlyCalendarManagerDirectAccess {
         GeometryReader { geometry in
             self.content(geometry: geometry)
         }
+        .onAppear{
+            print("먼슬리 캘린더뷰 나타남.")
+        }
     }
 
     private func content(geometry: GeometryProxy) -> some View {
@@ -43,17 +46,23 @@ public struct MonthlyCalendarView: View, MonthlyCalendarManagerDirectAccess {
             }
         }
         .frame(height: CalendarConstants.cellHeight)
+        .onAppear{
+            print("먼슬리 캘린더뷰  content 나타남.")
+        }
     }
 
     private var monthsList: some View {
         Group {
+            //새로운 달로 스크롤 할 때 불려지는 것. - onpagechanged
             if axis == .vertical {
+                
                 ElegantVList(manager: listManager,
                              pageTurnType: .monthlyEarlyCutoff,
                              viewForPage: monthView)
                     .onPageChanged(configureNewMonth)
                     .frame(width: CalendarConstants.Monthly.cellWidth)
             } else {
+                
                 ElegantHList(manager: listManager,
                              pageTurnType: .monthlyEarlyCutoff,
                              viewForPage: monthView)
@@ -76,14 +85,12 @@ public struct MonthlyCalendarView: View, MonthlyCalendarManagerDirectAccess {
                                     color: theme.primary)
         }
     }
-
 }
 
 struct MonthlyCalendarView_Previews: PreviewProvider {
     static var previews: some View {
         LightDarkThemePreview {
             MonthlyCalendarView(calendarManager: .mock)
-
             MonthlyCalendarView(calendarManager: .mockWithInitialMonth)
         }
     }
@@ -92,7 +99,6 @@ struct MonthlyCalendarView_Previews: PreviewProvider {
 private extension PageTurnType {
 
     static var monthlyEarlyCutoff: PageTurnType = .earlyCutoff(config: .monthlyConfig)
-
 }
 
 public extension EarlyCutOffConfiguration {
