@@ -48,24 +48,27 @@ struct MonthView: View, MonthlyCalendarManagerDirectAccess {
                         
                         calendarManager.is_edit_mode = false
                     print("후 에딧 모드 값: \(calendarManager.is_edit_mode)")
+                    //proco main calendarview에 커스텀한 메소드 실행.
+                        //첫번째 값: 심심기간 설정된 날짜 모두, 두번째 값: 
+                        delegate?.calendar(didEditBoringPeriod: self.selections, end: true)
                         
                     }){
                         Text( "완료")
                             .font(.callout)
                     }
-                    
                 //기간 수정 모드일 경우
                 }else if calendarManager.edit_boring_period{
                     
                     Button(action: {
-                        
                         print("수정 완료 클릭")
                         calendarManager.edit_boring_period = false
-
+                        
+                        //proco main calendarview에 커스텀한 메소드 실행.
+                            delegate?.calendar(didEditBoringPeriod: self.selections, end: true)
+                        
                     }){
                         Text("수정 완료")
                     }
-                
                 }else {
                     
                     Button(action: {
@@ -82,11 +85,9 @@ struct MonthView: View, MonthlyCalendarManagerDirectAccess {
                     }
                 }
             }
-                
-            }
             weeksViewWithDaysOfWeekHeader
         //일정 리스트 뷰 보여주는 것 예외처리 부분
-        //selectedDate가 존재하면 정보 리스트뷰를 보여준다.
+        //edit mode가 아니고 selectedDate가 존재하면 정보 리스트뷰를 보여준다.
         if (.inactive == self.editMode?.wrappedValue) && selectedDate != nil{
             
             calenderAccessoryView
@@ -118,14 +119,14 @@ private extension MonthView {
             .font(.system(size: 26))
             .bold()
             .tracking(7)
-            .foregroundColor(isWithinSameMonthAndYearAsToday ? theme.primary : .primary)
+            .foregroundColor(isWithinSameMonthAndYearAsToday ? Color.black : Color.black)
     }
 
     var yearText: some View {
         Text(month.year)
             .font(.system(size: 12))
             .tracking(2)
-            .foregroundColor(isWithinSameMonthAndYearAsToday ? theme.primary : .gray)
+            .foregroundColor(isWithinSameMonthAndYearAsToday ? Color.black : Color.gray)
             .opacity(0.95)
     }
 
@@ -138,15 +139,20 @@ private extension MonthView {
             daysOfWeekHeader
             weeksViewStack
         }
+        //캘린더가 너무 꽉차 보여서 패딩 추가
+        .padding((.leading),UIScreen.main.bounds.width/20)
+        .padding((.trailing),UIScreen.main.bounds.width/20)
+
     }
 
     var daysOfWeekHeader: some View {
-        HStack(spacing: CalendarConstants.Monthly.gridSpacing) {
+        //이전에 hstack에 (spacing: CalendarConstants.Monthly.gridSpacing)있었음.
+        HStack {
             ForEach(calendar.dayOfWeekInitials, id: \.self) { dayOfWeek in
                 Text(dayOfWeek)
                     .font(.caption)
                     .frame(width: CalendarConstants.Monthly.dayWidth)
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.gray)
             }
         }
     }
@@ -158,15 +164,19 @@ private extension MonthView {
             }
         }
     }
-
 }
 
 private extension MonthView {
 
     var calenderAccessoryView: some View {
         CalendarAccessoryView(calendarManager: calendarManager)
+            .onAppear{
+                print("상세 페이지뷰 나타남.selectedDate: \(selectedDate)")
+            }
+            .onDisappear{
+                print("상세 페이지뷰 사라짐. selectedDate: \(selectedDate)")
+            }
     }
-
 }
 
 private struct CalendarAccessoryView: View, MonthlyCalendarManagerDirectAccess {
@@ -188,70 +198,47 @@ private struct CalendarAccessoryView: View, MonthlyCalendarManagerDirectAccess {
     var body: some View {
         VStack {
             HStack{
-                
             selectedDayInformationView
-                
                 Spacer()
-                
                 Button(action: {
-                    
                    print("내 일정 추가하기 버튼 클릭")
                 }){
                     Image(systemName: "plus.circle.fill")
                         .resizable()
                         .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
                         .foregroundColor(Color.orange)
-                    
                 }
                 .padding(.trailing, UIScreen.main.bounds.width/20)
             }
-            HStack{
-                if calendarManager.selections.contains(selectedDate!){
-                    Button(action: {
-                        print("관심있어요 버튼 클릭")
-                        
-                    }){
-                        Image(systemName: "star")
-                            .resizable()
-                            .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
-                            .foregroundColor(Color.yellow)
-                        
-                    }
-                        
-                        Button(action: {
-                            print("관심있어요 갯수 클릭")
-                        }){
-                            Text("관심있어요")
-                                .font(.footnote)
-                        }
-                        Spacer()
-                }else{
-            Button(action: {
-                print("좋아요 버튼 클릭")
-                
-            }){
-                Image(systemName: "heart")
-                    .resizable()
-                    .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
-                    .foregroundColor(Color.red)
-                
-            }
-                
-                Button(action: {
-                    print("좋아요 갯수 클릭")
-                }){
-                    Text("좋아요")
-                        .font(.footnote)
-                }
-                Spacer()
-                }
-            }
-           // GeometryReader { geometry in
-                //2.23변경.
-//                self.datasource?.calendar(viewForSelectedDate: calendarManager.selectedDate!,
-//                                          dimensions: UIScreen.main.bounds.size)
-            //}
             
+            HStack{
+                
+                if calendarManager.selections.contains(selectedDate!){
+                    
+                    GeometryReader{geometry in
+                        
+                        calendarManager.datasource?.calendar(viewForInterest: selectedDate!, dimensions: geometry.size)
+                    }
+                }else{}
+//                else{
+//
+//            Button(action: {
+//                print("좋아요 버튼 클릭")
+//            }){
+//                Image(systemName: "heart")
+//                    .resizable()
+//                    .frame(width: UIScreen.main.bounds.width/15, height: UIScreen.main.bounds.width/15)
+//                    .foregroundColor(Color.red)
+//            }
+//                Button(action: {
+//                    print("좋아요 갯수 클릭")
+//                }){
+//                    Text("좋아요")
+//                        .font(.footnote)
+//                }
+//                Spacer()
+//                }
+            }
             self.datasource?.calendar(viewForScheduleDate: calendarManager.selectedDate!, dimensions: UIScreen.main.bounds.size)
         }
         .onAppear(perform: makeVisible)
@@ -298,16 +285,14 @@ private struct CalendarAccessoryView: View, MonthlyCalendarManagerDirectAccess {
 
         return Text("\(abs(numberOfDaysFromTodayToSelectedDate)) \(daysDescription)")
             .font(.system(size: 10))
-            .foregroundColor(.gray)
+            .foregroundColor(Color.gray)
     }
-
 }
 
 struct MonthView_Previews: PreviewProvider {
     static var previews: some View {
         LightDarkThemePreview {
             MonthView(calendarManager: .mock, month: Date())
-
             MonthView(calendarManager: .mock, month: .daysFromToday(45))
         }
     }
