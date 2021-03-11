@@ -53,23 +53,23 @@ public struct ProcoCalendarView: View {
 }
 
 
-struct ProcoCalendarView_Previews: PreviewProvider {
-    static var previews: some View {
-        // Only run one calendar at a time. SwiftUI has a limit for rendering time
-        Group {
-
-//            LightThemePreview {
-//                ElegantCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock))
-
-    //            ElegantCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock, initialMonth: Date()))
+//struct ProcoCalendarView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        // Only run one calendar at a time. SwiftUI has a limit for rendering time
+//        Group {
+//
+////            LightThemePreview {
+////                ElegantCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock))
+//
+//    //            ElegantCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock, initialMonth: Date()))
+////            }
+//
+//            DarkThemePreview {
+//                ProcoCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock))
+//
+//    //            ElegantCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock, initialMonth: Date()))
 //            }
-
-            DarkThemePreview {
-                ProcoCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock))
-
-    //            ElegantCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock, initialMonth: Date()))
-            }
-            
-        }
-    }
-}
+//
+//        }
+//    }
+//}
