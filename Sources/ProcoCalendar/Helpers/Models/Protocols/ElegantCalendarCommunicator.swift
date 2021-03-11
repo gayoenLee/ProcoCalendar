@@ -11,7 +11,9 @@ public protocol ElegantCalendarCommunicator {
 
 public extension ElegantCalendarCommunicator {
 
-    func scrollToMonthAndShowMonthlyView(_ month: Date) { }
+    func scrollToMonthAndShowMonthlyView(_ month: Date) {
+        print("ElegantCalendarCommunicator에서 scrollToMonthAndShowMonthlyView안 메소드")
+    }
     func showYearlyView() { }
 
 }

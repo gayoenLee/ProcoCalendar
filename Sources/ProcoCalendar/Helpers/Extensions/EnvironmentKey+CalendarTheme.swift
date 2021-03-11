@@ -9,7 +9,6 @@ public struct CalendarTheme: Equatable, Hashable {
     public init(primary: Color) {
         self.primary = primary
     }
-
 }
 
 public extension CalendarTheme {
@@ -58,5 +57,4 @@ private extension Color {
     static let orangeYellow = Color("orangeYellow")
     static let red = Color("red")
     static let royalBlue = Color("royalBlue")
-
 }

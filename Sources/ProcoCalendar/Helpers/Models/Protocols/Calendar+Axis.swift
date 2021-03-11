@@ -31,4 +31,4 @@ extension AxisModifiable {
 
 extension MonthlyCalendarView: AxisModifiable { }
 extension YearlyCalendarView: AxisModifiable { }
-extension ElegantCalendarView: AxisModifiable { }
+extension ProcoCalendarView: AxisModifiable { }

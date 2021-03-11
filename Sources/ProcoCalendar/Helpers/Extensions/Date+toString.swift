@@ -30,30 +30,40 @@ extension DateFormatter {
 
     static var abbreviatedMonth: DateFormatter {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.timeZone = TimeZone(abbreviation: "KST")
         formatter.dateFormat = "MMM"
         return formatter
     }
 
     static var dayOfWeekWithMonthAndDay: DateFormatter {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.timeZone = TimeZone(abbreviation: "KST")
         formatter.dateFormat = "EEEE MMMM d"
         return formatter
     }
 
     static var fullMonth: DateFormatter {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.timeZone = TimeZone(abbreviation: "KST")
         formatter.dateFormat = "MMMM"
         return formatter
     }
 
     static let timeOnlyWithPadding: DateFormatter = {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.timeZone = TimeZone(abbreviation: "KST")
         formatter.dateFormat = "h:mm a"
         return formatter
     }()
 
     static var year: DateFormatter {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.timeZone = TimeZone(abbreviation: "KST")
         formatter.dateFormat = "yyyy"
         return formatter
     }

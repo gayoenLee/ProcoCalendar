@@ -27,7 +27,7 @@ struct YearView: View, YearlyCalendarManagerDirectAccess {
     private var yearText: some View {
         Text(year.year)
             .font(.system(size: 38, weight: .thin, design: .rounded))
-            .foregroundColor(isYearSameAsTodayYear ? theme.primary : .primary)
+            .foregroundColor(isYearSameAsTodayYear ? Color.black : Color.black)
     }
 
     private var monthsStack: some View {

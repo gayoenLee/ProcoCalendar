@@ -5,8 +5,8 @@ import SwiftUI
 let screen = UIScreen.main.bounds
 
 struct CalendarConstants {
-
-    static let cellHeight: CGFloat = screen.height
+    //달력 상단에 나타나는 공간 때문에 월, 기간 설정 버튼 안보여서 cellHeight에 *0.8추가함
+    static let cellHeight: CGFloat = screen.height*0.8
 
     static let daysInRow: CGFloat = 7
 

@@ -42,7 +42,7 @@ extension MonthlyCalendarView: Buildable {
 
 }
 
-extension ElegantCalendarView: Buildable {
+extension ProcoCalendarView: Buildable {
 
     /// Changes the theme of the calendar
     ///
