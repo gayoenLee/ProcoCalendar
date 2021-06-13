@@ -4,8 +4,6 @@ import SwiftUI
 
 struct SmallMonthView: View, YearlyCalendarManagerDirectAccess {
 
-    @Environment(\.calendarTheme) var theme: CalendarTheme
-
     let calendarManager: YearlyCalendarManager
 
     let month: Date
@@ -39,14 +37,14 @@ struct SmallMonthView: View, YearlyCalendarManagerDirectAccess {
         .frame(width: CalendarConstants.Yearly.monthWidth)
         .contentShape(Rectangle())
         .opacity(isWithinDateRange ? 1 : 0)
-        .onTapGesture(perform: currentMonthSelected)
+        //.onTapGesture(perform: currentMonthSelected)
     }
 
     private var monthText: some View {
         Text(month.abbreviatedMonth.uppercased())
             .font(.subheadline)
             .bold()
-            .foregroundColor(isWithinSameMonthAndYearAsToday ? theme.primary : .primary)
+            .foregroundColor(isWithinSameMonthAndYearAsToday ? Color.blue : .primary)
     }
 
     private var weeksViewStack: some View {
@@ -60,20 +58,9 @@ struct SmallMonthView: View, YearlyCalendarManagerDirectAccess {
         }
     }
 
-    private func currentMonthSelected() {
-        calendarManager.monthTapped(month)
-    }
+//    private func currentMonthSelected() {
+//        calendarManager.monthTapped(month)
+//    }
 
 }
 
-struct SmallMonthView_Previews: PreviewProvider {
-    static var previews: some View {
-        LightDarkThemePreview {
-            SmallMonthView(calendarManager: .mock, month: Date())
-
-            SmallMonthView(calendarManager: .mock, month: .daysFromToday(45))
-
-            SmallMonthView(calendarManager: .mock, month: .daysFromToday(-30))
-        }
-    }
-}

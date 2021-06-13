@@ -24,15 +24,4 @@ struct WeekView: View, MonthlyCalendarManagerDirectAccess {
             }
         }
     }
-
-}
-
-struct WeekView_Previews: PreviewProvider {
-    static var previews: some View {
-        LightDarkThemePreview {
-            WeekView(calendarManager: .mock, week: Date())
-
-            WeekView(calendarManager: .mock, week: .daysFromToday(-7))
-        }
-    }
 }

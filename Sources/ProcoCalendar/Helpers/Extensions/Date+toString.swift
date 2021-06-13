@@ -40,7 +40,7 @@ extension DateFormatter {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.timeZone = TimeZone(abbreviation: "KST")
-        formatter.dateFormat = "EEEE MMMM d"
+        formatter.dateFormat = "EEEE MMMM dd"
         return formatter
     }
 

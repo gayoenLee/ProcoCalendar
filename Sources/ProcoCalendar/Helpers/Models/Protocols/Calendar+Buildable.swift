@@ -25,12 +25,7 @@ extension MonthlyCalendarView: Buildable {
     /// Changes the theme of the calendar
     ///
     /// - Parameter theme: theme of various components of the calendar
-    public func theme(_ theme: CalendarTheme) -> Self {
-        defer {
-            calendarManager.listManager.reloadPages()
-        }
-        return mutating(keyPath: \.theme, value: theme)
-    }
+
 
     /// Sets whether haptics  is enabled or not
     ///
@@ -47,9 +42,6 @@ extension ProcoCalendarView: Buildable {
     /// Changes the theme of the calendar
     ///
     /// - Parameter theme: theme of various components of the calendar
-    public func theme(_ theme: CalendarTheme) -> Self {
-        mutating(keyPath: \.theme, value: theme)
-    }
 
     /// Sets whether haptics  is enabled or not
     ///
@@ -66,8 +58,5 @@ extension YearlyCalendarView: Buildable {
     /// Changes the theme of the calendar
     ///
     /// - Parameter theme: theme of various components of the calendar
-    public func theme(_ theme: CalendarTheme) -> Self {
-        mutating(keyPath: \.theme, value: theme)
-    }
 
 }

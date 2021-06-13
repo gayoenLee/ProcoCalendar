@@ -1,10 +1,7 @@
-// Kevin Li - 11:30 PM - 6/6/20
-
 import SwiftUI
 
 struct DayView: View, MonthlyCalendarManagerDirectAccess {
     
-    @Environment(\.calendarTheme) var theme: CalendarTheme
     //심심 기간 추가시 사용.
     @Environment(\.editMode) var editMode
     
@@ -17,6 +14,11 @@ struct DayView: View, MonthlyCalendarManagerDirectAccess {
     
     private var isDayWithinDateRange: Bool {
         day >= calendar.startOfDay(for: startDate) && day <= endDate
+    }
+    
+    //내 일정이 있을 경우 날짜 한 칸에 이미지로 표시하기 위해 내 일정이 있는지 체크하는 메소드.
+    private var my_schedule_exist: Bool{
+        datasource?.calendar(myScheduleDate: day) ?? true
     }
     
     //맨 처음에 달력 보여줄 때 심심기간이면 다르게 표시해주기 위해 심심기간인지 아닌지 판별하는 것.
@@ -107,7 +109,6 @@ struct DayView: View, MonthlyCalendarManagerDirectAccess {
     
     private var isSelected: Bool {
         guard let selectedDate = calendarManager.selectedDate else { return false }
-        print("선택했을 때 is selected안에서 selectedDate값 : \(selectedDate)")
         if calendarManager.is_edit_mode{
             
             if calendarManager.selections.count == 0 {
@@ -128,15 +129,13 @@ struct DayView: View, MonthlyCalendarManagerDirectAccess {
     }
     
     var body: some View {
-        VStack{
+        VStack(alignment: .leading){
             HStack{
-                
                 Text(numericDay)
-                    //.font(.caption)
-                    .font((.system(size: 8)))
+                    .font(.custom("NanumSquareB", size: selectedDate != nil ? 13 : 13))
+                    
                     .foregroundColor(selected_color)
-                    .frame(width: selectedDate != nil ? CalendarConstants.Monthly.dayWidth/2 : UIScreen.main.bounds.width/30, height: selectedDate != nil ? CalendarConstants.Monthly.dayWidth/2 : UIScreen.main.bounds.width/20)
-                    .background(selectedDate != nil ? backgroundColor : nil)
+                    //.background(selectedDate != nil ? Color.gray : nil)
                     .clipShape(Rectangle())
                     .opacity(opacity)
                     //그냥 날짜 한 개 클릭했을 때 나타나는 뷰
@@ -173,13 +172,22 @@ struct DayView: View, MonthlyCalendarManagerDirectAccess {
                         Button("♠️ - 내 일정 추가", action: calendarManager.selectSpades)
                         Button("♦️ - 관심있어요", action: calendarManager.selectDiamonds)
                     }
-                Spacer()
-            }
-            if selectedDate == nil && is_edit_mode == false && !is_in_range(){
-                GeometryReader{geometry in
-                    calendarManager.datasource?.calendar(viewForSelectedDate: day, dimensions: geometry.size)
+                //Spacer()
+                //내 일정이 등록된 날짜일 경우 보여주는 이미지
+                if my_schedule_exist && calendarManager.date_info_appear == false{
+                    Image("my_schedule_icon")
+                        .resizable()
+                        .frame(width: 9.5, height: 8)
                 }
-
+            }
+            HStack{
+            if selectedDate == nil && !is_edit_mode && !is_in_range(){
+               // GeometryReader{geometry in
+                
+                calendarManager.datasource?.calendar(viewForSelectedDate: day, dimensions: UIScreen.main.bounds.size)
+               // }
+                //.aspectRatio(contentMode: .fill)
+            }
             }
             Spacer()
             HStack{
@@ -188,18 +196,23 @@ struct DayView: View, MonthlyCalendarManagerDirectAccess {
                  - 심심기간 수정하는 경우 관심있어요 뷰는 나타나지 않는다.
              */
                 if calendarManager.edit_boring_period{
-                    
                 }else{
-                if is_in_range(){
-                    GeometryReader{geometry in
-                        calendarManager.datasource?.calendar(viewForInterest: day, dimensions: geometry.size)
+                    if is_in_range() && calendarManager.date_info_appear == false{
+                    GeometryReader{ geometry in
+
+                        calendarManager.datasource?.calendar(viewForSmallInterest: day, dimensions: geometry.size)
                     }
-                }
-        
+                   // .aspectRatio(contentMode: .fill)
+                 }
                 }
             }
-            .frame(width: selectedDate != nil ? CalendarConstants.Monthly.dayWidth*0.8 : CalendarConstants.Monthly.dayWidth*0.8, height: selectedDate != nil ?  CalendarConstants.Monthly.dayWidth*0.8 : CalendarConstants.Monthly.dayWidth*0.8)
         }
+        .onTapGesture(perform: notifyManager)
+//        .onTapGesture {
+//            print("날짜 한 개 클릭; \(numericDay)")
+//        }
+        .frame(width: selectedDate != nil ? CalendarConstants.Monthly.dayWidth*0.7 : CalendarConstants.Monthly.dayWidth, height: selectedDate != nil ? CalendarConstants.Monthly.dayWidth*0.9 : CalendarConstants.Monthly.dayWidth*1.8)
+        .background(is_in_range() ? Color.boring_period_color : nil)
         .alert(isPresented: self.$check_delete_alert, content: {
             Alert(title: Text("심심기간 삭제"), message: Text("해당 기간을 삭제하시겠습니까?"), primaryButton: Alert.Button.default(Text("확인"), action: {
                 print("심심 기간 삭제 클릭")
@@ -225,19 +238,6 @@ struct DayView: View, MonthlyCalendarManagerDirectAccess {
         } else {
             return Color.black
             
-        }
-    }
-    
-    private var backgroundColor: some View {
-        Group {
-            if isDayToday {
-                Color.yellow
-            } else if isDaySelectableAndInRange {
-                theme.primary
-                    .opacity(datasource?.calendar(backgroundColorOpacityForDate: day) ?? 1)
-            } else {
-                Color.clear
-            }
         }
     }
     
@@ -301,7 +301,7 @@ private struct AddBoringSelectedView: View{
     }
     
     private var radius: CGFloat {
-        startBounce ? CalendarConstants.Monthly.dayWidth + 6 : CalendarConstants.Monthly.dayWidth + 25
+        startBounce ? CalendarConstants.Monthly.dayWidth*0.7: CalendarConstants.Monthly.dayWidth*0.9
     }
     
     private func startBounceAnimation() {
@@ -314,7 +314,7 @@ private struct CircularSelectionView: View {
     @State private var startBounce = false
     
     var body: some View {
-        Rectangle()
+      Circle()
             .stroke(Color.primary, lineWidth: 2)
             .frame(width: radius, height: radius)
             .opacity(startBounce ? 1 : 0)
@@ -323,7 +323,7 @@ private struct CircularSelectionView: View {
     }
     
     private var radius: CGFloat {
-        startBounce ? CalendarConstants.Monthly.dayWidth + 6 : CalendarConstants.Monthly.dayWidth + 25
+        startBounce ? CalendarConstants.Monthly.dayWidth : CalendarConstants.Monthly.dayWidth + 25
     }
     
     private func startBounceAnimation() {
@@ -332,12 +332,3 @@ private struct CircularSelectionView: View {
     
 }
 
-struct DayView_Previews: PreviewProvider {
-    static var previews: some View {
-        LightDarkThemePreview {
-            DayView(calendarManager: .mock, week: Date(), day: Date())
-            
-            DayView(calendarManager: .mock, week: Date(), day: .daysFromToday(3))
-        }
-    }
-}

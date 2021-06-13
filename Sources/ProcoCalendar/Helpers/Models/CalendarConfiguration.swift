@@ -7,8 +7,8 @@ public struct CalendarConfiguration: Equatable {
 
     public let calendar: Calendar
     public let ascending: Bool
-    public let startDate: Date
-    public let endDate: Date
+    public var startDate: Date
+    public var endDate: Date
 
     public init(calendar: Calendar = .current, ascending: Bool = true, startDate: Date, endDate: Date) {
         self.calendar = calendar

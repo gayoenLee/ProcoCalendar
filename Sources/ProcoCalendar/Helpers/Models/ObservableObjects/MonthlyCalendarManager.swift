@@ -4,22 +4,37 @@ import Combine
 import ElegantPages
 import SwiftUI
 
+extension Notification.Name {
+    static let calendar_owner_click = Notification.Name("calendar_owner_click")
+}
 public class MonthlyCalendarManager: ObservableObject, ConfigurationDirectAccess {
     
     @Published public private(set) var currentMonth: Date
+    
+    @Published public var previous_month: Date? = Date()
+    
     //선택한 날짜(클릭한)
     @Published public var selectedDate: Date? = nil{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
     
     //심심기간 추가 모드일 경우 구분 위해 추가
     @Published public var is_edit_mode: Bool = false{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
+    //마이페이지 이동 구분값
+    @Published public var go_mypage: Bool = false{
+        didSet{
+            objectWillChange.send()
+            print("주인 프로필 클릭해서 마이 페이지 이동값 변경됨: \(self.go_mypage)")
+            NotificationCenter.default.post(name: Notification.Name.calendar_owner_click, object: nil, userInfo: ["calendar_owner_click" : "ok"])
+        }
+    }
+    
     public let objectWillChange = ObservableObjectPublisher()
     let listManager: ElegantListManager
     
@@ -35,14 +50,14 @@ public class MonthlyCalendarManager: ObservableObject, ConfigurationDirectAccess
     
     //selections와 구분하기 위해 심심기간을 추가하려 할 때 이곳에 임시로 배열 담아놓는 공간.
     @Published public var temp_selections : [Date] = []{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
     
     //심심기간 수정시 선택한 날짜가 포함된 기간들을 담아놓기 위한 공간
     @Published public var edit_period : [Date] = []{
-        willSet{
+        didSet{
             objectWillChange.send()
         }
     }
@@ -52,7 +67,37 @@ public class MonthlyCalendarManager: ObservableObject, ConfigurationDirectAccess
     
     //심심기간 수정시 수정모드임을 알릴 수 있는 변수.
     @Published var edit_boring_period: Bool = false{
-        willSet{
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    
+    //날짜 칸안의 관심있어요 버튼 뷰를 상세페이지가 나타날 경우 안보이게 하기 위해 구분하는데 사용.
+    @Published var date_info_appear : Bool = false{
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    
+    //캘린더 주인 프로필 보여주기 위해 추가
+    @Published var owner_idx: Int = -1{
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    
+    @Published var owner_photo_path: String = ""{
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    @Published var owner_name: String = ""{
+        didSet{
+            objectWillChange.send()
+        }
+    }
+    @Published var watch_user_idx: Int = -1{
+        didSet{
             objectWillChange.send()
         }
     }
@@ -68,7 +113,9 @@ public class MonthlyCalendarManager: ObservableObject, ConfigurationDirectAccess
     
     private var anyCancellable: AnyCancellable?
     
-    public init(configuration: CalendarConfiguration, initialMonth: Date? = nil, selections: [Date]? = nil) {
+    public init(configuration: CalendarConfiguration, initialMonth: Date? = nil, selections: [Date]? = nil, owner_idx: Int? = nil, owner_photo_path: String? = "", owner_name: String? = "", watch_user_idx: Int? = nil, go_mypage: Bool?, previousMonth: Date) {
+        print("순서4. 먼슬리캘린더매니저 init안에 들어온 initialmonth: \(initialMonth), previous month: \(previousMonth)")
+        
         self.configuration = configuration
         
         let months = configuration.calendar.generateDates(
@@ -85,15 +132,29 @@ public class MonthlyCalendarManager: ObservableObject, ConfigurationDirectAccess
         if let initialMonth = initialMonth {
             startingPage = configuration.calendar.monthsBetween(configuration.referenceDate, and: initialMonth)
         }
+        //ahems zhemrk ehfaustj init되기 때문에 널일 수도 있고, 초기값을 설정해줘야 함.
+        self.owner_idx = owner_idx ?? -1
+        self.owner_photo_path = owner_photo_path ?? ""
+        self.owner_name = owner_name ?? ""
+        self.watch_user_idx = watch_user_idx ?? -1
+        
+        self.go_mypage = go_mypage ?? false
+       
+        self.previous_month = previousMonth
         
         currentMonth = months[startingPage]
-        
+   
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "LLLL"
+       
         listManager = .init(startingPage: startingPage,
                             pageCount: months.count)
+        
         //실행됨. 달에 대한 정보
         anyCancellable = $delegate.sink {
-            print("먼슬리 캘린더 매니저에서 달에 대한 정보 delegate sink")
-            $0?.calendar(willDisplayMonth: self.currentMonth)
+            //여기 previousmonth가 오류
+            print("delegate sink에서 will display month 실행: \(self.currentMonth),\(self.previous_month) ")
+            $0?.calendar(willDisplayMonth: self.currentMonth, previousMonth: previousMonth)
         }
     }
 }
@@ -101,25 +162,38 @@ public class MonthlyCalendarManager: ObservableObject, ConfigurationDirectAccess
 extension MonthlyCalendarManager {
     
     //2. direct access에서 메소드 호출하고 이 메소드 다시 불려짐. 새로운 달로 넘어갈 떄 실행돼서 로그 나옴.
+    //만약 새로운 달로 스크롤시 새로운 달 정보는 months[page] 이전 달 정보는 currentMonth
     func configureNewMonth(at page: Int) {
         
-        if months[page] != currentMonth {
-            print("configure new month의 page: \(page)")
-            currentMonth = months[page]
-            print("configure new month의 currentMonth: \(currentMonth)")
-            
-            selectedDate = nil
-            print("셀렉션즈 확인: \(selections)")
-            
-            //실행됨. 달에 대한 정보
-            delegate?.calendar(willDisplayMonth: currentMonth)
-            
-            if allowsHaptics && isHapticActive {
-                UIImpactFeedbackGenerator.generateSelectionHaptic()
-            } else {
-                isHapticActive = true
-            }
-        }
+        print("**********************먼슬리캘린더 매니저에서configure new month 메소드 들어옴.****************************")
+        print("순서5. 먼슬리캘린더 매니저에서 컨피규어 메소드 ")
+     
+//        if months[page] != currentMonth {
+//            print("configure new month의 page: \(page), current_month: \(currentMonth) months[page]: \( months[page])")
+//
+//            previous_month = self.previous_month
+//            currentMonth = months[page]
+//
+//            print("configure new month 이전 달: \(previous_month)")
+//            print("configure new month의 currentMonth: \(currentMonth)")
+//
+//            selectedDate = nil
+//            print("셀렉션즈 확인: \(selections)")
+//
+//            //프로코메인캘린뷰에서 실행됨. 달에 대한 정보
+//            delegate?.calendar(willDisplayMonth: currentMonth, previousMonth: previous_month!)
+//            print("delegate이후 실행")
+//
+//            if allowsHaptics && isHapticActive {
+//                UIImpactFeedbackGenerator.generateSelectionHaptic()
+//            } else {
+//                isHapticActive = true
+//            }
+//
+//        }else{
+//            print("configure new month else구문: months[page] :\(months[page]), current month: \(currentMonth)")
+//        }
+        
     }
     
     //날짜를 기간의 시작날짜 - 끝날짜 저장하는 것에서 모든 날짜를 저장하는 것으로 이야기가 돼서 변경하기 위해 추가한 메소드.
@@ -217,7 +291,7 @@ extension MonthlyCalendarManager {
         }
         return canSelectDay
     }
-    
+    //날짜 롱클릭시 컨텍스트 메뉴 중 하나
     func selectHearts() {
         // Act on hearts selection.
         print("selectHearts 클릭")
@@ -319,7 +393,7 @@ extension MonthlyCalendarManager {
                 self.temp_selections = []
                 
             } else{
-                print("day tappend에서 이전에 선택했던 날짜와 다름.: 이전 날짜: \(String(describing: selectedDate)) 지금 선택한 날짜: \(day)")
+                print("day tapped에서 이전에 선택했던 날짜와 다름.: 이전 날짜: \(String(describing: selectedDate)) 지금 선택한 날짜: \(day)")
                 //이전에 선택했던 날짜가 없을 경우 temp_selections에 지금 선택한 날짜가 시작 날짜.
                 if temp_selections.count != 1 {
                     
@@ -434,9 +508,9 @@ extension MonthlyCalendarManager {
 
 extension MonthlyCalendarManager {
     
-    static let mock = MonthlyCalendarManager(configuration: .mock)
-    
-    static let mockWithInitialMonth = MonthlyCalendarManager(configuration: .mock, initialMonth: .daysFromToday(60))
+//    static let mock = MonthlyCalendarManager(configuration: .mock, go_mypage: false)
+//
+//    static let mockWithInitialMonth = MonthlyCalendarManager(configuration: .mock, initialMonth: .daysFromToday(60), go_mypage: false)
     
 }
 
@@ -477,6 +551,10 @@ extension MonthlyCalendarManagerDirectAccess {
         calendarManager.currentMonth
     }
     
+    var previous_month: Date{
+        calendarManager.previous_month!
+    }
+    
     //추가
     var selectedDate: Date? {
         calendarManager.selectedDate
@@ -486,15 +564,28 @@ extension MonthlyCalendarManagerDirectAccess {
         calendarManager.is_edit_mode
     }
     
+    var owner_idx : Int{
+        calendarManager.owner_idx
+    }
+    
+    var owner_photo_path: String{
+        calendarManager.owner_photo_path
+    }
+    
     //3.02추가
     //새로운 달로 이동시 selections배열에 새로 값을 넣어주는데 편하게 사용하기 위해 추가
     var selections: [Date] {
         calendarManager.selections
     }
+    //프로필 클릭시 마이 페이지 이동 구분값
+    var go_mypage: Bool{
+        calendarManager.go_mypage
+    }
     
     //1.새로운 달로 스크롤 - onpagechanged에서 첫번째로 불려지는 것.
     func configureNewMonth(at page: Int) {
-        print("먼슬리 캘린더 매니저에서 configureNewMonth")
+
+        print("먼슬리 캘린더 매니저에서 configureNewMonth direct access: \(page)")
         calendarManager.configureNewMonth(at: page)
     }
     

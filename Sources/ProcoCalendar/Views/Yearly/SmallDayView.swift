@@ -35,13 +35,3 @@ struct SmallDayView: View, YearlyCalendarManagerDirectAccess {
     }
 
 }
-
-struct SmallDayView_Previews: PreviewProvider {
-    static var previews: some View {
-        LightDarkThemePreview {
-            SmallDayView(calendarManager: .mock, week: Date(), day: Date())
-
-            SmallDayView(calendarManager: .mock, week: Date(), day: .daysFromToday(3))
-        }
-    }
-}

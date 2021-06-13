@@ -4,8 +4,6 @@ import SwiftUI
 
 struct YearView: View, YearlyCalendarManagerDirectAccess {
 
-    @Environment(\.calendarTheme) var theme: CalendarTheme
-
     let calendarManager: YearlyCalendarManager
 
     let year: Date
@@ -51,14 +49,4 @@ struct YearView: View, YearlyCalendarManagerDirectAccess {
         }
     }
     
-}
-
-struct YearView_Previews: PreviewProvider {
-    static var previews: some View {
-        LightDarkThemePreview {
-            YearView(calendarManager: .mock, year: Date())
-
-            YearView(calendarManager: .mock, year: .daysFromToday(365))
-        }
-    }
 }

@@ -17,11 +17,3 @@ struct ScrollBackToTodayButton: View {
         .animation(.easeInOut)
     }
 }
-
-struct ScrollBackToTodayButton_Previews: PreviewProvider {
-    static var previews: some View {
-        LightDarkThemePreview {
-            ScrollBackToTodayButton(scrollBackToToday: {}, color: .purple)
-        }
-    }
-}

@@ -4,36 +4,42 @@ import ElegantPages
 import SwiftUI
 
 public struct ProcoCalendarView: View {
-
-    var theme: CalendarTheme = .default
+    
     public var axis: Axis = .horizontal
 
     public let calendarManager: ElegantCalendarManager
 
     public init(calendarManager: ElegantCalendarManager) {
         self.calendarManager = calendarManager
+       
     }
-
+    
     public var body: some View {
+        
         content
+            .navigationBarTitle("", displayMode: .inline)
+            .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
     }
     
     private var content: some View {
-        Group {
+     Group {
             if axis == .vertical {
-                ElegantVPages(manager: calendarManager.pagesManager) {
-                    yearlyCalendarView
+                //연도 달력으로 스크롤되는 기능 막아놓음.
+               // ElegantVPages(manager: calendarManager.pagesManager) {
+                 //   yearlyCalendarView
                     monthlyCalendarView
-                }
-                .onPageChanged(calendarManager.scrollToYearIfOnYearlyView)
+                //}
+                //.onPageChanged(calendarManager.scrollToYearIfOnYearlyView)
                 .erased
-            } else {
-                ElegantHPages(manager: calendarManager.pagesManager) {
-                    yearlyCalendarView
+            }
+            else {
+               // ElegantHPages(manager: calendarManager.pagesManager) {
+                  //  yearlyCalendarView
                     monthlyCalendarView
-                }
-                .onPageChanged(calendarManager.scrollToYearIfOnYearlyView)
-                .erased
+               // }
+               // .onPageChanged(calendarManager.scrollToYearIfOnYearlyView)
+               // .erased
             }
         }
     }
@@ -41,35 +47,14 @@ public struct ProcoCalendarView: View {
     private var yearlyCalendarView: some View {
         YearlyCalendarView(calendarManager: calendarManager.yearlyManager)
             .axis(axis.inverted)
-            .theme(theme)
+            .onAppear{
+                print("yearly calendar view나타남.")
+            }
     }
 
     private var monthlyCalendarView: some View {
         MonthlyCalendarView(calendarManager: calendarManager.monthlyManager)
             .axis(axis.inverted)
-            .theme(theme)
     }
 
 }
-
-
-//struct ProcoCalendarView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        // Only run one calendar at a time. SwiftUI has a limit for rendering time
-//        Group {
-//
-////            LightThemePreview {
-////                ElegantCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock))
-//
-//    //            ElegantCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock, initialMonth: Date()))
-////            }
-//
-//            DarkThemePreview {
-//                ProcoCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock))
-//
-//    //            ElegantCalendarView(calendarManager: ElegantCalendarManager(configuration: .mock, initialMonth: Date()))
-//            }
-//
-//        }
-//    }
-//}

@@ -5,7 +5,6 @@ import SwiftUI
 
 public struct MonthlyCalendarView: View, MonthlyCalendarManagerDirectAccess {
 
-    var theme: CalendarTheme = .default
     public var axis: Axis = .vertical
 
     @ObservedObject public var calendarManager: MonthlyCalendarManager
@@ -26,6 +25,8 @@ public struct MonthlyCalendarView: View, MonthlyCalendarManagerDirectAccess {
     public var body: some View {
         GeometryReader { geometry in
             self.content(geometry: geometry)
+                //.padding(.all)
+
         }
         .onAppear{
             print("먼슬리 캘린더뷰 나타남.")
@@ -37,15 +38,10 @@ public struct MonthlyCalendarView: View, MonthlyCalendarManagerDirectAccess {
 
         return ZStack(alignment: .top) {
             monthsList
-
-            if isTodayWithinDateRange && !isCurrentMonthYearSameAsTodayMonthYear {
-                leftAlignedScrollBackToTodayButton
-                    .padding(.trailing, CalendarConstants.Monthly.outerHorizontalPadding)
-                    .offset(y: CalendarConstants.Monthly.topPadding + 3)
-                    .transition(.opacity)
-            }
         }
-        .frame(height: CalendarConstants.cellHeight)
+        .frame(height: CalendarConstants.cellHeight*0.8)
+        .navigationBarTitle("", displayMode: .inline)
+        .navigationBarHidden(true)
         .onAppear{
             print("먼슬리 캘린더뷰  content 나타남.")
         }
@@ -55,14 +51,12 @@ public struct MonthlyCalendarView: View, MonthlyCalendarManagerDirectAccess {
         Group {
             //새로운 달로 스크롤 할 때 불려지는 것. - onpagechanged
             if axis == .vertical {
-                
                 ElegantVList(manager: listManager,
                              pageTurnType: .monthlyEarlyCutoff,
                              viewForPage: monthView)
                     .onPageChanged(configureNewMonth)
                     .frame(width: CalendarConstants.Monthly.cellWidth)
             } else {
-                
                 ElegantHList(manager: listManager,
                              pageTurnType: .monthlyEarlyCutoff,
                              viewForPage: monthView)
@@ -74,27 +68,11 @@ public struct MonthlyCalendarView: View, MonthlyCalendarManagerDirectAccess {
 
     private func monthView(for page: Int) -> AnyView {
         MonthView(calendarManager: calendarManager, month: months[page])
-            .environment(\.calendarTheme, theme)
             .erased
     }
 
-    private var leftAlignedScrollBackToTodayButton: some View {
-        HStack {
-            Spacer()
-            ScrollBackToTodayButton(scrollBackToToday: scrollBackToToday,
-                                    color: theme.primary)
-        }
-    }
 }
 
-struct MonthlyCalendarView_Previews: PreviewProvider {
-    static var previews: some View {
-        LightDarkThemePreview {
-            MonthlyCalendarView(calendarManager: .mock)
-            MonthlyCalendarView(calendarManager: .mockWithInitialMonth)
-        }
-    }
-}
 
 private extension PageTurnType {
 

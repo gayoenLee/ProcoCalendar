@@ -1,24 +1,23 @@
-// Kevin Li - 11:00 AM - 6/7/20
-
 import SwiftUI
 
 let screen = UIScreen.main.bounds
 
 struct CalendarConstants {
     //달력 상단에 나타나는 공간 때문에 월, 기간 설정 버튼 안보여서 cellHeight에 *0.8추가함
-    static let cellHeight: CGFloat = screen.height*0.8
+    static let cellHeight: CGFloat = screen.height*0.01
 
     static let daysInRow: CGFloat = 7
 
     struct Monthly {
 
         static var cellWidth: CGFloat!
-        static let horizontalPadding: CGFloat = cellWidth * 0.045
+        static let horizontalPadding: CGFloat = cellWidth * 0.03
 
         static let outerHorizontalPadding: CGFloat = horizontalPadding + dayWidth/4
-
-        static let topPadding: CGFloat = cellHeight * 0.078
-        static let gridSpacing: CGFloat = cellWidth * 0.038
+        //월, 심심기간 설정 있는 상단 바 위 패딩값
+        static let topPadding: CGFloat = cellHeight*0.078
+        //날짜 칸 사이 간격
+        static let gridSpacing: CGFloat = cellWidth * 0.001
 
         static let dayWidth: CGFloat = {
             let totalHorizontalPadding: CGFloat = 2 * horizontalPadding
@@ -56,3 +55,4 @@ struct CalendarConstants {
     }
 
 }
+

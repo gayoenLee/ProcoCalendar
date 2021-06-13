@@ -21,12 +21,13 @@ public class YearlyCalendarManager: ObservableObject, ConfigurationDirectAccess 
 
     public var communicator: ElegantCalendarCommunicator?
 
-    public let configuration: CalendarConfiguration
-    public let years: [Date]
+    public var configuration: CalendarConfiguration
+    public var years: [Date]
 
     private var anyCancellable: AnyCancellable?
 
     public init(configuration: CalendarConfiguration, initialYear: Date? = nil) {
+       // print("연도 달력: \(initialYear)")
         self.configuration = configuration
 
         let years = configuration.calendar.generateDates(
@@ -35,10 +36,12 @@ public class YearlyCalendarManager: ObservableObject, ConfigurationDirectAccess 
             matching: .firstDayOfEveryYear)
 
         self.years = configuration.ascending ? years : years.reversed()
-
+      //  print("year calendarmanager에서 years확인: \(years)")
+        
+        
         if let initialYear = initialYear {
-            let page = calendar.yearsBetween(referenceDate, and: initialYear)
-            currentPage = (page, .scroll)
+//            let page = calendar.yearsBetween(referenceDate, and: initialYear)
+//            currentPage = (page, .scroll)
         } else {
             anyCancellable = $delegate.sink {
                 $0?.calendar(willDisplayYear: self.currentYear)
@@ -48,32 +51,71 @@ public class YearlyCalendarManager: ObservableObject, ConfigurationDirectAccess 
 
 }
 
-extension YearlyCalendarManager {
-
-    public func scrollBackToToday() {
-        scrollToYear(Date())
-    }
-
-    public func scrollToYear(_ year: Date) {
-        if !calendar.isDate(currentYear, equalTo: year, toGranularity: .year) {
-            let page = calendar.yearsBetween(referenceDate, and: year)
-            currentPage = (page, .scroll)
-        }
-    }
-
-    func willDisplay(page: Int) {
-        if currentPage.index != page || currentPage.state == .scroll {
-            currentPage = (page, .completed)
-            delegate?.calendar(willDisplayYear: currentYear)
-        }
-    }
-
-    func monthTapped(_ month: Date) {
-        delegate?.calendar(didSelectMonth: month)
-        communicator?.scrollToMonthAndShowMonthlyView(month)
-    }
-
-}
+//extension YearlyCalendarManager {
+//
+//    public func scrollBackToToday() {
+//        scrollToYear(Date())
+//    }
+//
+//    public func scrollToYear(_ year: Date) {
+//        print("연도 달력 scroll to year: \(year)")
+//        if !calendar.isDate(currentYear, equalTo: year, toGranularity: .year) {
+//            print("if문안 currentyear: \(currentYear)")
+//
+//            let page = calendar.yearsBetween(referenceDate, and: year)
+//            print("page: \(page), refrencedate: \(referenceDate)")
+//            currentPage = (page, .scroll)
+//        }
+//    }
+//
+//    func willDisplay(page: Int) {
+//        print("연도 달력 will display: \(page)")
+//        if currentPage.index != page || currentPage.state == .scroll {
+//            currentPage = (page, .completed)
+//            print("if문안 currentPage: \(currentPage)")
+//
+//            delegate?.calendar(willDisplayYear: currentYear)
+//        }
+//        if page <= 1{
+//
+//            print("1보다 작을 때 비포 start date: \(startDate)")
+//            configuration.startDate =  Calendar.current.date(byAdding: .month, value: -10, to: startDate)!
+//            print("after start date: \(startDate)")
+//            configuration.endDate =  Calendar.current.date(byAdding: .month, value: -10, to: endDate)!
+//            print("after endDate: \(endDate)")
+//
+//            let years = configuration.calendar.generateDates(
+//                inside: DateInterval(start: Calendar.current.date(byAdding: .month, value: -10, to: startDate)!,
+//                                     end: Calendar.current.date(byAdding: .month, value: -10, to: endDate)!),
+//                matching: .firstDayOfEveryYear)
+//
+//            self.years = configuration.ascending ? years : years.reversed()
+//            print("1보다 작을 때 years 확인: \(years)")
+//            delegate?.calendar(willDisplayYear: currentYear)
+//
+//        }else if page >= 3{
+//            print("3보다 클 때 비포 start date: \(startDate)")
+//            configuration.startDate =  Calendar.current.date(byAdding: .month, value: 12, to: startDate)!
+//            configuration.endDate = Calendar.current.date(byAdding: .month, value: 12, to: endDate)!
+//
+//            let years = configuration.calendar.generateDates(
+//                inside: DateInterval(start: Calendar.current.date(byAdding: .month, value: -12, to: startDate)!,
+//                                     end: Calendar.current.date(byAdding: .month, value: -12, to: endDate)!),
+//                matching: .firstDayOfEveryYear)
+//
+//            self.years = configuration.ascending ? years : years.reversed()
+//            print("3보다 클 때 years 확인: \(years)")
+//
+//            delegate?.calendar(willDisplayYear: currentYear)
+//        }
+//    }
+//
+//    func monthTapped(_ month: Date) {
+//        delegate?.calendar(didSelectMonth: month)
+//        communicator?.scrollToMonthAndShowMonthlyView(month)
+//    }
+//
+//}
 
 extension YearlyCalendarManager {
 
@@ -120,8 +162,10 @@ extension YearlyCalendarManagerDirectAccess {
 private extension Calendar {
 
     func yearsBetween(_ date1: Date, and date2: Date) -> Int {
+        print("첫번째: \(date1), 두번째: \(date2)")
         let startOfYearForDate1 = startOfYear(for: date1)
         let startOfYearForDate2 = startOfYear(for: date2)
+        
         return abs(dateComponents([.year],
                               from: startOfYearForDate1,
                               to: startOfYearForDate2).year!)

@@ -5,6 +5,7 @@ import SwiftUI
 extension Calendar {
     
     var dayOfWeekInitials: [String] {
+        
         veryShortWeekdaySymbols
     }
     
@@ -33,6 +34,12 @@ extension Calendar {
     func startOfYear(for date: Date) -> Date {
         let components = dateComponents([.year], from: date)
         return self.date(from: components)!
+    }
+    //일,월,화,수...등 요일 이름 가져오는 메소드.
+    func generate_week_name() -> [String]{
+        var calendar = Calendar.current
+        calendar.locale = Locale(identifier: "ko_KR")
+        return calendar.dayOfWeekInitials
     }
 
 }
